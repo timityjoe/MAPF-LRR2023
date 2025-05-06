@@ -10,6 +10,10 @@ using json = nlohmann::ordered_json;
 
 list<Task> BaseSystem::move(vector<Action>& actions)
 {
+    // assigned_tasks - Tasks that haven't been finished, but have been revealed to agents;
+    // Set limit is [num_tasks_reveal]
+    printf("BaseSystem::move() - num_tasks_reveal:%i all_tasks:%i assigned_tasks:%i \n", num_tasks_reveal, all_tasks.size(), assigned_tasks.size());
+
     // actions.resize(num_of_agents, Action::NA);
     for (int k = 0; k < num_of_agents; k++)
     {
@@ -48,6 +52,8 @@ list<Task> BaseSystem::move(vector<Action>& actions)
         actual_movements[k].push_back(actions[k]);
     }
 
+    printf("BaseSystem::move()      all_tasks:%i assigned_tasks:%i \n", all_tasks.size(), assigned_tasks.size());
+
     return finished_tasks_this_timestep;
 }
 
@@ -59,9 +65,12 @@ bool BaseSystem::valid_moves(vector<State>& prev, vector<Action>& action)
 }
 
 
-void BaseSystem::sync_shared_env() {
+void BaseSystem::sync_shared_env() 
+{
+    printf("BaseSystem::sync_shared_env() \n");
 
-    if (!started){
+    if (!started)
+    {
         env->goal_locations.resize(num_of_agents);
         for (size_t i = 0; i < num_of_agents; i++)
         {
@@ -79,6 +88,8 @@ void BaseSystem::sync_shared_env() {
 
 vector<Action> BaseSystem::plan_wrapper()
 {
+    printf("BaseSystem::plan_wrapper() \n");
+
     vector<Action> actions;
     planner->plan(plan_time_limit, actions);
 
@@ -88,6 +99,8 @@ vector<Action> BaseSystem::plan_wrapper()
 
 vector<Action> BaseSystem::plan()
 {
+    printf("BaseSystem::plan() \n");
+
     using namespace std::placeholders;
     if (started && future.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
     {
@@ -128,6 +141,8 @@ vector<Action> BaseSystem::plan()
 
 bool BaseSystem::planner_initialize()
 {
+    printf("BaseSystem::planner_initialize() \n");
+
     using namespace std::placeholders;
     std::packaged_task<void(int)> init_task(std::bind(&MAPFPlanner::initialize, planner, std::placeholders::_1));
     auto init_future = init_task.get_future();
@@ -171,9 +186,11 @@ void BaseSystem::log_event_finished(int agent_id, int task_id, int timestep)
     logger->log_info("Agent " + std::to_string(agent_id) + " finishes task " + std::to_string(task_id), timestep);
 }
 
-
+// Tim: Main execution sequence happens here
 void BaseSystem::simulate(int simulation_time)
 {
+    printf("(0)  BaseSystem::simulate() all_tasks.size():%i \n", all_tasks.size());
+
     //init logger
     //Logger* log = new Logger();
     initialize();
@@ -182,14 +199,17 @@ void BaseSystem::simulate(int simulation_time)
     for (; timestep < simulation_time; )
     {
         // find a plan
+        printf("    A- sync_shared_env() \n");
         sync_shared_env();
 
         auto start = std::chrono::steady_clock::now();
 
+        printf("    B- plan() \n");
         vector<Action> actions = plan();
 
         auto end = std::chrono::steady_clock::now();
 
+        printf("    C- Increment timestep:%i counts \n", timestep);
         timestep += 1;
         for (int a = 0; a < num_of_agents; a++)
         {
@@ -199,6 +219,8 @@ void BaseSystem::simulate(int simulation_time)
 
         // move drives
         list<Task> new_finished_tasks = move(actions);
+        printf("    D- nove(), then Identified newly finished tasks total:%i \n", new_finished_tasks.size());
+
         if (!planner_movements[0].empty() && planner_movements[0].back() == Action::NA)
         {
             planner_times.back()+=plan_time_limit;  //add planning time to last record
@@ -210,6 +232,7 @@ void BaseSystem::simulate(int simulation_time)
         }
 
         // update tasks
+        printf("    E- num_of_tasks:%i, num_of_task_finish:%i \n", num_of_tasks, num_of_task_finish);
         for (auto task : new_finished_tasks)
         {
             // int id, loc, t;
@@ -219,11 +242,14 @@ void BaseSystem::simulate(int simulation_time)
             num_of_task_finish++;
         }
 
+        printf("    F- update_tasks() \n");
         update_tasks();
 
         bool complete_all = false;
         for (auto & t: assigned_tasks)
         {
+            printf("    F1- assigned_tasks.size():%i \n", t.size());
+
             if(t.empty()) 
             {
                 complete_all = true;
@@ -234,8 +260,13 @@ void BaseSystem::simulate(int simulation_time)
                 break;
             }
         }
+
+        printf("    G- complete_all:%i \n", complete_all);
+        printf("---------------------------------------- \n\n");
         if (complete_all)
         {
+            printf("    G_END- All tasks completed! \n");
+            printf("---------------------------------------- \n\n");
             break;
         }
     }
@@ -244,6 +275,8 @@ void BaseSystem::simulate(int simulation_time)
 
 void BaseSystem::initialize()
 {
+    printf("BaseSystem::initialize() \n");
+
     paths.resize(num_of_agents);
     events.resize(num_of_agents);
     env->num_of_agents = num_of_agents;
@@ -279,6 +312,8 @@ void BaseSystem::initialize()
 
 void BaseSystem::savePaths(const string &fileName, int option) const
 {
+    printf("BaseSystem::savePaths() \n");    
+
     std::ofstream output;
     output.open(fileName, std::ios::out);
     for (int i = 0; i < num_of_agents; i++)
@@ -324,6 +359,8 @@ void BaseSystem::savePaths(const string &fileName, int option) const
 
 void BaseSystem::saveResults(const string &fileName, int screen) const
 {
+    printf("BaseSystem::saveResults() \n");
+
     json js;
     // Save action model
     js["actionModel"] = "MAPF_T";
@@ -534,6 +571,8 @@ void BaseSystem::saveResults(const string &fileName, int screen) const
 
 bool FixedAssignSystem::load_agent_tasks(string fname)
 {
+    printf("FixedAssignSystem::load_agent_tasks() \n");
+
     string line;
     std::ifstream myfile(fname.c_str());
     if (!myfile.is_open()) return false;
@@ -588,10 +627,14 @@ bool FixedAssignSystem::load_agent_tasks(string fname)
 
 void FixedAssignSystem::update_tasks()
 {
+    printf("FixedAssignSystem::update_tasks() \n");
+
     for (int k = 0; k < num_of_agents; k++)
     {
         while (assigned_tasks[k].size() < num_tasks_reveal && !task_queue[k].empty())
         {
+            printf("        AgentID:%i, assigned_tasks[k].size():%i,  task_queue[k].size():%i \n", k, assigned_tasks[k].size(), task_queue[k].size());
+
             Task task = task_queue[k].front();
             task_queue[k].pop_front();
             assigned_tasks[k].push_back(task);
@@ -605,10 +648,14 @@ void FixedAssignSystem::update_tasks()
 
 void TaskAssignSystem::update_tasks()
 {
+    printf("TaskAssignSystem::update_tasks() \n");
+
     for (int k = 0; k < num_of_agents; k++)
     {
         while (assigned_tasks[k].size() < num_tasks_reveal && !task_queue.empty())
         {
+            printf("        AgentID:%i, assigned_tasks[k].size():%i,  task_queue[k].size():%i \n", k, assigned_tasks[k].size(), task_queue.size());
+
             Task task = task_queue.front();
             task.t_assigned = timestep;
             task.agent_assigned = k;
@@ -622,9 +669,14 @@ void TaskAssignSystem::update_tasks()
 }
 
 
-void InfAssignSystem::update_tasks(){
+void InfAssignSystem::update_tasks()
+{
+    printf("InfAssignSystem::update_tasks() \n");
+
     for (int k = 0; k < num_of_agents; k++)
     {
+        // printf("    AgentID:%i \n", k);
+
         while (assigned_tasks[k].size() < num_tasks_reveal) 
         {
             int i = task_counter[k] * num_of_agents + k;
@@ -636,7 +688,12 @@ void InfAssignSystem::update_tasks(){
             all_tasks.push_back(task);
             task_id++;
             task_counter[k]++;
+
+            printf("        AgentID:%i assigned_tasks empty! - events[k].size():%i timestep:%i all_tasks.size():%i task_id:%i, task_counter[k]:%i \n", 
+                k, events[k].size(), timestep, all_tasks.size(), task_id, task_counter[k]);
         }
     }
+
+    // printf("    all_tasks.size():%i \n", all_tasks.size());
 }
 

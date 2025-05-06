@@ -145,7 +145,7 @@ void CompetitionGraph::preprocessing(bool consider_rotation, const string & file
                     auto end = std::chrono::steady_clock::now();
                     double elapse=std::chrono::duration<double>(end-start).count();
                     double estimated_remain=elapse/ctr*(total-ctr);
-                    cout<<ctr<<"/"<<total<<" completed in "<<elapse<<"s. estimated time to finish all: "<<estimated_remain<<"s.  estimated total time: "<<(estimated_remain+elapse)<<"s."<<endl;
+                    cout<<ctr<<"/"<<total<<" completed in "<<elapse<<"s. estimated time to finish all: "<<estimated_remain<<"s.  estimated total time: "<<(estimated_remain+elapse)<<"s." <<endl;
                 }
             }
 		}

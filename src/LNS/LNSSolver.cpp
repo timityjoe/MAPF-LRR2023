@@ -117,7 +117,7 @@ void LNSSolver::plan(const SharedEnvironment & env){
         // }
     }
 
-    ONLYDEV(std::cout<<"disabled_agents:"<<disabled_agent_count<<std::endl;)
+    ONLYDEV(std::cout<<"disabled_agents:"<<disabled_agent_count <<std::endl;)
 
     // : we need to replan for all agents that has no plan
     // later we may think of padding all agents to the same length
@@ -357,7 +357,7 @@ void LNSSolver::plan(const SharedEnvironment & env){
         if (plan_time>max_plan_time) {
             max_plan_time=plan_time;
         }
-        std::cerr<<"max_plan_time: "<<max_plan_time<<endl;
+        std::cerr<<"max_plan_time: "<<max_plan_time << "\r" <<endl;
         g_timer.remove_d("_plan");  
         // if (plan_time>1.0){
         //     exit(-1);

@@ -42,6 +42,9 @@ int main(int argc, char **argv)
     pybind11::initialize_interpreter();
 #endif
 #endif
+
+    printf("(0) Main() - Start \n");
+
     // Declare the supported options.
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
@@ -76,6 +79,8 @@ int main(int argc, char **argv)
     }
 
     Logger *logger = new Logger(vm["logFile"].as<std::string>());
+
+    printf("(1) Main() - Init Planner \n");
 
     MAPFPlanner *planner = nullptr;
     // Planner is inited here, but will be managed and deleted by system_ptr deconstructor
@@ -122,10 +127,27 @@ int main(int argc, char **argv)
 
     std::vector<int> agents = read_int_vec(base_folder + read_param_json<std::string>(data, "agentFile"), team_size);
     std::vector<int> tasks = read_int_vec(base_folder + read_param_json<std::string>(data, "taskFile"));
+
+    printf("(2) Main() - tasks.size():%i \n", tasks.size());
+
+    // *Print out a few values
+    std::vector<int>::iterator iter = tasks.begin();
+    for(int i = 0; i < 10; i++)
+    {
+        int val = *iter;
+        printf("    i:%i, val:%i \n", i, val);
+        iter++;
+    }
+
+    printf("(3) Main() agents.size():%i \n", agents.size());
+
     if (agents.size() > tasks.size())
         logger->log_warning("Not enough tasks for robots (number of tasks < team size)");
 
     std::string task_assignment_strategy = data["taskAssignmentStrategy"].get<std::string>();
+
+    printf("task_assignment_strategy:%s \n", task_assignment_strategy.c_str());
+
     if (task_assignment_strategy == "greedy")
     {
         system_ptr = std::make_unique<TaskAssignSystem>(grid, planner, agents, tasks, model);
@@ -158,12 +180,15 @@ int main(int argc, char **argv)
 
     signal(SIGINT, sigint_handler);
 
+    printf("(4) Main() - Running Simulation... \n\n");
     system_ptr->simulate(vm["simulationTime"].as<int>());
 
     if (!vm["evaluationMode"].as<bool>())
     {
         system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputScreen"].as<int>());
     }
+
+    printf("(5) Main() - End! \n\n");
 
     delete model;
     delete logger;

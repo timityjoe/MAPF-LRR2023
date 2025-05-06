@@ -5,16 +5,35 @@ HeuristicTable::HeuristicTable(SharedEnvironment * _env, const std::shared_ptr<s
     env(*_env),
     action_model(_env),
     consider_rotation(consider_rotation),
-    map_weights(map_weights) {
-    if (consider_rotation) {
+    map_weights(map_weights) 
+{
+    printf("HeuristicTable::HeuristicTable()   Note: env is SharedEnvironment class \n");
+    printf("    env - rows:%i cols:%i num_of_agents:%i \n", env.rows, env.cols, env.num_of_agents);
+    printf("    env - map.size:%i map_name:%s file_storage_path:%s \n", env.map.size(), env.map_name.c_str(), env.file_storage_path.c_str());
+    printf("    env - goal_locations.size:%i curr_states.size():%i \n", env.goal_locations.size(), env.curr_states.size());
+
+    if (consider_rotation) 
+    {
+        printf("    Considering Rotation YES \n");
         n_orientations=4;
-    } else {
+    } 
+    else 
+    {
+        printf("    Considering Rotation NO \n");
         n_orientations=1;
     }
 
+    // ie:  Rows = 140, Cols = 500
+    //      Total map size =  140*500 = 70,000
+    //      Minus off obstacle sites (value 0)  = 38586  loc_size
+    //      Unoccupied is (value 1)
     loc_size=0;
-    for (int i=0;i<env.map.size();++i) {
-        if (!env.map[i]) {
+    for (int i=0;i< env.map.size();++i) 
+    {
+        // printf("i:%i env.map[i]:%i \n", i, env.map[i]);
+        if (!env.map[i]) 
+        {
+            // printf("    !env.map[i]:%i \n", env.map[i]);
             ++loc_size;
         }
     }
@@ -53,7 +72,11 @@ HeuristicTable::~HeuristicTable() {
 
 // weights is an array of [loc_size*n_orientations]
 void HeuristicTable::compute_weighted_heuristics(){
-    DEV_DEBUG("[start] Compute heuristics.");
+    DEV_DEBUG("HeuristicTable::compute_weighted_heuristics() - [start] Compute heuristics. \n");
+
+    printf("        goal_locations.size:%i curr_states.size():%i \n", env.goal_locations.size(), env.curr_states.size());
+
+    
     ONLYDEV(g_timer.record_p("heu/compute_start");)
 
     int n_threads=omp_get_max_threads();
@@ -73,6 +96,7 @@ void HeuristicTable::compute_weighted_heuristics(){
     int step=100;
     auto start = std::chrono::steady_clock::now();
 
+    // Computes the weights for every location in the map. Size of Map == Rows * Columns
     #pragma omp parallel for schedule(dynamic,1)
     for (int loc_idx=0;loc_idx<loc_size;++loc_idx)
     {
@@ -80,7 +104,9 @@ void HeuristicTable::compute_weighted_heuristics(){
 
         int s_idx=thread_id*n_orientations*state_size;
 
-        _compute_weighted_heuristics(loc_idx,values+s_idx,planners[thread_id]);
+        // printf("     _compute_weighted_heuristics() - loc_idx:%i thread_id:%i s_idx:%i \n", loc_idx, thread_id, s_idx);
+
+        _compute_weighted_heuristics(loc_idx, values+s_idx, planners[thread_id]);
 
 
         #pragma omp critical
@@ -90,7 +116,7 @@ void HeuristicTable::compute_weighted_heuristics(){
                 auto end = std::chrono::steady_clock::now();
                 double elapse=std::chrono::duration<double>(end-start).count();
                 double estimated_remain=elapse/ctr*(loc_size-ctr);
-                cout<<ctr<<"/"<<loc_size<<" completed in "<<elapse<<"s. estimated time to finish all: "<<estimated_remain<<"s.  estimated total time: "<<(estimated_remain+elapse)<<"s."<<endl;
+                cout<< "HeuristicTable::compute_weighted_heuristics() " << ctr<<"/"<<loc_size<<" traversable cells done in "<<elapse<<"s. est time to fin. all: "<<estimated_remain<<"s.  est total time: "<<(estimated_remain+elapse)<<"s." <<endl;
             }
         }
 
@@ -117,7 +143,10 @@ void HeuristicTable::_compute_weighted_heuristics(
     int start_loc_idx,
     float * values,
     UTIL::SPATIAL::SpatialAStar * planner
-) {
+) 
+{
+    // printf("HeuristicTable::_compute_weighted_heuristics() start_loc_idx:%i \n", start_loc_idx);
+
     int start_loc=empty_locs[start_loc_idx];
     if (!consider_rotation){
         planner->reset();
@@ -198,7 +227,10 @@ void HeuristicTable::_compute_weighted_heuristics(
     }
 }
 
-void HeuristicTable::dump_main_heuristics(int start_loc, string file_path_prefix) {
+void HeuristicTable::dump_main_heuristics(int start_loc, string file_path_prefix) 
+{
+    printf("HeuristicTable::dump_main_heuristics() - goal_locations.size:%i curr_states.size():%i \n", env.goal_locations.size(), env.curr_states.size());
+
     int start_loc_idx=loc_idxs[start_loc];
     if (start_loc_idx==-1) {
         std::cerr<<"error: start_loc_idx==-1"<<endl;

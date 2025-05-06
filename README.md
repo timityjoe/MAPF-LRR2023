@@ -14,6 +14,11 @@ We call our algorithm Windowed Parallel PIBT-LNS (WPPL). Essentially, it is a co
 
 ![alt text](imgs/algorithm_overview.png)
 
+## Generate map weights / guidance graphs
+# Note: 1st line of *.task file, to state [number of tasks]
+python3 scripts/gen_weight_warehouse_small.py
+
+
 ## Compile and Run Experiments
 Before reading the following, you may want to take a look at the official documents of the competition in the `official_docs` folder.
 
@@ -21,6 +26,7 @@ To compile and run codes in this repo:
 1. You may need to install boost, openmp and spdlog, e.g. by `sudo apt install libboost-all-dev libomp-dev libspdlog-dev`. If anything is still missing, you can check `apt.txt`.
 2. Use `./compile.sh` to compile
 3. Use `run.sh` to run all the experiments.
+    ./run.v1.sh
 4. Official json-format logs will be generated at the output path specified by `-o`.
 5. If compiled with `set(DEV on)`, the program will output more statistics in the command line and also output an analysis file in the path specified by the filed `analysis_output` in the configuration file introduced below.
 

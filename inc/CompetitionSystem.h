@@ -104,7 +104,7 @@ protected:
 
 };
 
-
+// (task_assignment_strategy == "roundrobin_fixed")
 class FixedAssignSystem : public BaseSystem
 {
 public:
@@ -138,6 +138,8 @@ public:
             }
             // task_queue[i] = deque<int>(tasks[i].begin(), tasks[i].end());
         }
+
+        printf("FixedAssignSystem::FixedAssignSystem() all_tasks.size():%i \n", all_tasks.size());
     };
 
 	~FixedAssignSystem(){};
@@ -151,7 +153,7 @@ private:
 	void update_tasks();
 };
 
-
+// (task_assignment_strategy == "greedy")
 class TaskAssignSystem : public BaseSystem
 {
 public:
@@ -182,7 +184,7 @@ private:
 	void update_tasks();
 };
 
-
+// (task_assignment_strategy == "roundrobin")
 class InfAssignSystem : public BaseSystem
 {
 public:
@@ -193,6 +195,8 @@ public:
         starts.resize(num_of_agents);
         task_counter.resize(num_of_agents,0);
         tasks_size = tasks.size();
+
+        printf("InfAssignSystem Constructor() - tasks_size:%i \n", tasks_size);
 
         for (size_t i = 0; i < start_locs.size(); i++)
         {

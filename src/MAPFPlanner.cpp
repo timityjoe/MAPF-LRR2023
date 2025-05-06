@@ -31,7 +31,10 @@ struct cmp {
     }
 };
 
-void MAPFPlanner::load_configs() {
+void MAPFPlanner::load_configs() 
+{
+    printf("MAPFPlanner::load_configs() \n");
+
     // load configs
 	string config_path="configs/"+env->map_name.substr(0,env->map_name.find_last_of("."))+".json";
     char * _config_path=getenv("CONFIG_PATH");
@@ -86,8 +89,12 @@ void MAPFPlanner::load_configs() {
     }
 }
 
-RHCR::MAPFSolver* MAPFPlanner::rhcr_build_mapf_solver(nlohmann::json & config, RHCR::CompetitionGraph & graph) {
+RHCR::MAPFSolver* MAPFPlanner::rhcr_build_mapf_solver(nlohmann::json & config, RHCR::CompetitionGraph & graph) 
+{
+    printf("MAPFPlanner::rhcr_build_mapf_solver() \n");
+
     // build single agent solver
+    printf("    single_agent_solver: \n");
     string solver_name = read_param_json<string>(config,"single_agent_solver");
 	RHCR::SingleAgentSolver* path_planner;
 	RHCR::MAPFSolver* mapf_solver;
@@ -106,6 +113,7 @@ RHCR::MAPFSolver* MAPFPlanner::rhcr_build_mapf_solver(nlohmann::json & config, R
 	}
 
     // build multi-agent solver
+    printf("    multi_agent_solver: \n");
 	solver_name = read_param_json<string>(config,"solver");
 	if (solver_name == "ECBS")
 	{
@@ -154,7 +162,10 @@ RHCR::MAPFSolver* MAPFPlanner::rhcr_build_mapf_solver(nlohmann::json & config, R
 	}
 }
 
-void MAPFPlanner::rhcr_config_solver(std::shared_ptr<RHCR::RHCRSolver> & solver,nlohmann::json & config) {
+void MAPFPlanner::rhcr_config_solver(std::shared_ptr<RHCR::RHCRSolver> & solver,nlohmann::json & config) 
+{
+    printf("MAPFPlanner::rhcr_config_solver() \n");
+
     solver->outfile = read_param_json<string>(config,"output");
     solver->screen = read_param_json<int>(config,"screen");
     solver->log = read_param_json<bool>(config,"log");
@@ -181,7 +192,10 @@ void MAPFPlanner::rhcr_config_solver(std::shared_ptr<RHCR::RHCRSolver> & solver,
     srand(solver->seed);
 }
 
-std::string MAPFPlanner::load_map_weights(string weights_path) {
+std::string MAPFPlanner::load_map_weights(string weights_path) 
+{
+    printf("MAPFPlanner::load_map_weights() weights_path:%s \n", weights_path.c_str());
+
     // : make weights float
     // we have at least 5 weights for a location: right,down,left,up,stay
     map_weights=std::make_shared<std::vector<float> >(env->rows*env->cols*5,1);
@@ -215,7 +229,10 @@ std::string MAPFPlanner::load_map_weights(string weights_path) {
     return suffix;
 }
 
-void MAPFPlanner::initialize(int preprocess_time_limit) {
+void MAPFPlanner::initialize(int preprocess_time_limit) 
+{
+    printf("MAPFPlanner::initialize() \n");
+
     cout << "planner initialization begins" << endl;
     load_configs();
 
@@ -295,6 +312,8 @@ void MAPFPlanner::initialize(int preprocess_time_limit) {
 // plan using simple A* that ignores the time dimension
 void MAPFPlanner::plan(int time_limit,vector<Action> & actions) 
 {
+    printf("MAPFPlanner::plan() \n");
+
     // NOTE we need to return within time_limit, but we can exploit this time duration as much as possible
 
     // check if we need to restart a plan task (thread)
@@ -327,7 +346,7 @@ void MAPFPlanner::plan(int time_limit,vector<Action> & actions)
         lacam2_solver->get_step_actions(*env,actions);
         ONLYDEV(g_timer.record_d("mapf_lacam2_get_step_s","mapf_lacam2_get_step");)
     } else if (lifelong_solver_name=="LNS") {
-        ONLYDEV(cout<<"using LNS"<<endl;)
+        ONLYDEV(cout<<"using LNS" << endl;)
         lns_solver->observe(*env);
         lns_solver->plan(*env); 
         lns_solver->get_step_actions(*env,actions);
@@ -345,7 +364,7 @@ void MAPFPlanner::plan(int time_limit,vector<Action> & actions)
             max_step_time=step_time;
         }
 
-        std::cerr<<"max_step_time: "<<max_step_time<<endl;
+        std::cerr<<"max_step_time: "<< max_step_time <<endl;
         g_timer.remove_d("_step");
     )
 
