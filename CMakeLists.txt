@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(lifelong)
 
-set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD 17)
 
 
 # set(MAP_OPT ON)
@@ -42,7 +42,11 @@ find_package( Boost 1.49.0 REQUIRED COMPONENTS program_options system filesystem
 include_directories( ${Boost_INCLUDE_DIRS} )
 
 find_package(OpenMP REQUIRED)
-find_package(spdlog REQUIRED)
+
+# Mod by Tim:
+# find_package(spdlog REQUIRED)
+# find_package(spdlog CONFIG REQUIRED)
+
 find_package(Threads REQUIRED)
 find_package(Python 3.8 COMPONENTS Interpreter Development REQUIRED)
 
@@ -108,23 +112,19 @@ ENDIF()
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wfatal-errors")
 
 add_executable(lifelong ${SOURCES} )
-target_link_libraries(lifelong ${Boost_LIBRARIES})
-target_link_libraries(lifelong OpenMP::OpenMP_CXX)
-target_link_libraries(lifelong spdlog::spdlog)
+target_link_libraries(lifelong PUBLIC ${Boost_LIBRARIES} OpenMP::OpenMP_CXX)
 target_compile_definitions(lifelong PRIVATE PYTHON=${PYTHON_FLAG})
 
 IF (MAP_OPT)
-    list(FILTER SOURCES EXCLUDE REGEX "src/driver\.cpp")
+    list(FILTER SOURCES EXCLUDE REGEX "src/driver\\.cpp")
     pybind11_add_module(py_driver "src/py_driver.cpp" ${SOURCES})
-    target_link_libraries(py_driver PRIVATE OpenMP::OpenMP_CXX)
-    target_link_libraries(py_driver PRIVATE spdlog::spdlog)
-    target_link_libraries(py_driver PRIVATE ${Boost_LIBRARIES})
+    target_link_libraries(py_driver PRIVATE OpenMP::OpenMP_CXX ${Boost_LIBRARIES})
 ENDIF()
 
 # ENDIF()
 
 # add_executable(test_log "test/my_logger.cpp" "src/util/MyLogger.cpp")
-# target_link_libraries(test_log spdlog::spdlog)
+# target_link_libraries(test_log ${Boost_LIBRARIES})
 
 # add_executable(test_openlist "test/my_openlist.cpp")
 # add_executable(test_thread_pool "test/thread_pool.cpp")

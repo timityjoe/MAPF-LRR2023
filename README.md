@@ -30,6 +30,8 @@ To compile and run codes in this repo:
 4. Official json-format logs will be generated at the output path specified by `-o`.
 5. If compiled with `set(DEV on)`, the program will output more statistics in the command line and also output an analysis file in the path specified by the filed `analysis_output` in the configuration file introduced below.
 
+
+
 ## Experiment Configuraions
 The command line options are the general settings for io and simulation. The configuration files describe the map-specific algorithm settings. The environment variables are some extra advanced settings.
 
@@ -51,3 +53,22 @@ The problem will automatically load the default configuration files in the `conf
 
 ## Further Questions
 If you have any questions, you can send me an [email](srevir@foxmail.com).
+
+
+## FAQs (on Ubuntu 24.04)
+## Q1
+In file included from /usr/include/spdlog/fmt/fmt.h:31,
+                 from /usr/include/spdlog/common.h:50,
+                 from /usr/include/spdlog/spdlog.h:12,
+                 from /media/Data/Astute_Nexa/nexa_mapf/MAPF-LRR2023/inc/util/MyLogger.h:2,
+                 from /media/Data/Astute_Nexa/nexa_mapf/MAPF-LRR2023/inc/util/Timer.h:9,
+                 from /media/Data/Astute_Nexa/nexa_mapf/MAPF-LRR2023/inc/util/HeuristicTable.h:12,
+                 from /media/Data/Astute_Nexa/nexa_mapf/MAPF-LRR2023/inc/LaCAM2/planner.hpp:10,
+                 from /media/Data/Astute_Nexa/nexa_mapf/MAPF-LRR2023/inc/LaCAM2/LaCAM2Solver.hpp:7,
+                 from /media/Data/Astute_Nexa/nexa_mapf/MAPF-LRR2023/inc/MAPFPlanner.h:21:
+/usr/include/fmt/format.h: In member function ‘void fmt::v9::detail::bigint::subtract_aligned(const fmt::v9::detail::bigint&)’:
+/usr/include/fmt/format.h:2743:5: error: class template argument deduction failed:
+ 2743 |     FMT_ASSERT(compare(*this, other) >= 0, "");
+
+## Ans 1:
+Code (and CMakeList.txt) has been updated to use Boost.Log instead of Spdlog and FMT, due to changes across Ubuntu 20.04 and Ubuntu 24.04
