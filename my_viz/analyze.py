@@ -2,7 +2,9 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
-path="../analysis_dev.json"
+# path="../analysis_dev.json"
+path="../offline_eval/warehouse_small_10_result.json"
+
 h=32
 w=32
 

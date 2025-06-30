@@ -641,6 +641,16 @@ void FixedAssignSystem::update_tasks()
             events[k].push_back(make_tuple(task.task_id,timestep,"assigned"));
             all_tasks.push_back(task);
             // log_event_assigned(k, task.task_id, timestep);
+
+            printf("                events[k].size():%i timestep:%i all_tasks.size():%i \n", k, events[k].size(), timestep, all_tasks.size());
+            printf("                Agent Event List: \n");
+            list<std::tuple<int,int,std::string>>::iterator event_list_iter;
+            for(event_list_iter = events[k].begin(); event_list_iter != events[k].end(); event_list_iter++)
+            {
+                const auto [task_id_val, timestep_value, task_des_string] = *event_list_iter;
+                printf("                task_id_val:%i, timestep_value:%i task_des_string:%s \n", task_id_val, timestep_value, task_des_string.c_str());
+            }
+
         }
     }
 }
@@ -679,8 +689,15 @@ void InfAssignSystem::update_tasks()
 
         while (assigned_tasks[k].size() < num_tasks_reveal) 
         {
-            int i = task_counter[k] * num_of_agents + k;
-            int loc = tasks[i%tasks_size];
+            const int i = task_counter[k] * num_of_agents + k;
+            const int task_index = i%tasks_size;
+            // const int loc = tasks[i%tasks_size];
+            const int loc = tasks[task_index];
+
+            printf("        AgentID:%i needs new tasks, tasks_size:%i \n", k, tasks_size);
+            printf("                task_counter[k]:%i num_of_agents:%i, int_i:%i, int_k:%i tasks[task_index:%i] = loc:%i \n", 
+                task_counter[k], num_of_agents, i, k, task_index, loc);
+
             Task task(task_id,loc,timestep,k);
             assigned_tasks[k].push_back(task);
             events[k].push_back(make_tuple(task.task_id,timestep,"assigned"));
@@ -689,8 +706,19 @@ void InfAssignSystem::update_tasks()
             task_id++;
             task_counter[k]++;
 
-            printf("        AgentID:%i assigned_tasks empty! - events[k].size():%i timestep:%i all_tasks.size():%i task_id:%i, task_counter[k]:%i \n", 
-                k, events[k].size(), timestep, all_tasks.size(), task_id, task_counter[k]);
+            // TODO: 1) View what is in events 2) See how are tasks identified and done
+            //      Observed that simlation ends after 5000 timestep(s) under "InfAssignSystem" ("taskAssignmentStrategy": "roundrobin")
+            printf("                events[k].size():%i timestep:%i all_tasks.size():%i task_id:%i, task_counter[k]:%i \n", 
+                                    k, events[k].size(), timestep, all_tasks.size(), task_id, task_counter[k]);
+
+            printf("                Agent Event List: \n");
+            list<std::tuple<int,int,std::string>>::iterator event_list_iter;
+            for(event_list_iter = events[k].begin(); event_list_iter != events[k].end(); event_list_iter++)
+            {
+                const auto [task_id_val, timestep_value, task_des_string] = *event_list_iter;
+                printf("                task_id_val:%i, timestep_value:%i task_des_string:%s \n", task_id_val, timestep_value, task_des_string.c_str());
+            }
+
         }
     }
 

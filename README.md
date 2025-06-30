@@ -18,6 +18,21 @@ We call our algorithm Windowed Parallel PIBT-LNS (WPPL). Essentially, it is a co
 # Note: 1st line of *.task file, to state [number of tasks]
 python3 scripts/gen_weight_warehouse_small.py
 
+## /my_viz folder
+cd my_viz/
+python3 task_distribution.py
+python3 analyze.py
+python3 map.py
+python3 viz_ppath.py
+
+## /python folder
+cd python/
+python3 testlib.py
+python3 pyMAPFPlanner.py
+
+## Build exec for python
+cmake -B build ./ -DPYTHON=true -DCMAKE_BUILD_TYPE=Release
+make -C build -j
 
 ## Compile and Run Experiments
 Before reading the following, you may want to take a look at the official documents of the competition in the `official_docs` folder.

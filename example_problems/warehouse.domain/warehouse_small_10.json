@@ -4,5 +4,5 @@
     "teamSize": 10,
     "taskFile": "tasks/warehouse_small_100.tasks",
     "numTasksReveal": 1,
-    "taskAssignmentStrategy": "roundrobin"
+    "taskAssignmentStrategy": "roundrobin_fixed"
 }

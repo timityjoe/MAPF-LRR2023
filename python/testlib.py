@@ -20,3 +20,7 @@ def test_torch():
     # Define a model and move it to the appropriate device
     # model = MyModel()
     # model = model.to(device)
+
+
+if __name__ == "__main__":
+    test_torch()
