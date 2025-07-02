@@ -86,4 +86,4 @@ In file included from /usr/include/spdlog/fmt/fmt.h:31,
  2743 |     FMT_ASSERT(compare(*this, other) >= 0, "");
 
 ## Ans 1:
-Code (and CMakeList.txt) has been updated to use Boost.Log instead of Spdlog and FMT, due to changes across Ubuntu 20.04 and Ubuntu 24.04
+Codes (and CMakeList.txt) have been updated to use Boost.Log instead of Spdlog and FMT, due to changes across Ubuntu 20.04 and Ubuntu 24.04

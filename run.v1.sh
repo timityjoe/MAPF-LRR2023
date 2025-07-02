@@ -24,9 +24,12 @@ ARGS="--planTimeLimit 1 --fileStoragePath large_files/"
 # ./build/lifelong --inputFile example_problems/warehouse.domain/warehouse_large_8000.json $ARGS -o ${OUTPUT_FOLDER}warehouse_large_8000_result.json --simulationTime 5000 
 
 # (Works okay, ./offline_eval/warehouse_large_200_result.json, ~5MB)
-#./build/lifelong --inputFile example_problems/warehouse.domain/warehouse_large_200.json $ARGS -o ${OUTPUT_FOLDER}warehouse_large_200_result.json --simulationTime 5000 
+# ./build/lifelong --inputFile example_problems/warehouse.domain/warehouse_large_200.json $ARGS -o ${OUTPUT_FOLDER}warehouse_large_200_result.json --simulationTime 5000 
 
 #./build/lifelong --inputFile example_problems/warehouse.domain/warehouse_small_200.json $ARGS -o ${OUTPUT_FOLDER}warehouse_small_200_result.json --simulationTime 5000
+
+# Note that "warehouse_small_10.json", "taskAssignmentStrategy": "roundrobin_fixed" is not working. Use "roundrobin" instead.
+# (Works okay, ./offline_eval/warehouse_small_10_result.json, ~700kB)
 ./build/lifelong --inputFile example_problems/warehouse.domain/warehouse_small_10.json $ARGS -o ${OUTPUT_FOLDER}warehouse_small_10_result.json --simulationTime 5000
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 
